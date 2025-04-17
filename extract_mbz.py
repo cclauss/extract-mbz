@@ -4,7 +4,7 @@
 # requires-python = ">=3.9"
 # dependencies = [
 #     "python-magic",
-#     "slugify",
+#     "python-slugify",
 # ]
 # ///
 
@@ -104,7 +104,6 @@ def initializeLogfile(logfileName):
         logfile.write("Moodle Extract\n")
         logfile.write("Course: " + shortname + " (" + fullname + ")\n")
         logfile.write(" Format: " + format + "\n")
-        logfile.write(" Sections: " + topics + "\n")
         logfile.write("Extract started: " + timeStamp + "\n")
         logfile.write("------------------------\n")
         print("Extract Log File: {0}".format(logFileSpec))
@@ -181,7 +180,7 @@ def unzip_mbz_file(mbz_filepath):
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 print(
-    "\n##################\nextract-mbz.py\nextract moodle content from mbz backup (python v2.7)\n"
+    "\n##################\nextract-mbz.py\nextract moodle content from mbz backup (Python 3)\n"
 )
 pipe = "|"
 nl = "\n"
@@ -230,7 +229,7 @@ if not os.path.exists(os.path.join(source, "moodle_backup.xml")):
 
 
 pattern = re.compile(
-    "^\s*(.+\.(?:pdf|png|gif|jpg|jpeg|zip|rtf|sav|mp3|mht|por|xlsx?|docx?|pptx?))\s*$",
+    r"^\s*(.+\.(?:pdf|png|gif|jpg|jpeg|zip|rtf|sav|mp3|mht|por|xlsx?|docx?|pptx?))\s*$",
     flags=re.IGNORECASE,
 )
 
@@ -240,8 +239,7 @@ shortname = courseTree.getroot().find("shortname").text
 fullname = courseTree.getroot().find("fullname").text
 crn = courseTree.getroot().find("idnumber").text
 format = courseTree.getroot().find("format").text
-topics = courseTree.getroot().find("numsections").text
-
+# topics = courseTree.getroot().find("numsections").text
 
 destinationRoot = os.path.join(str(source), slugify(str(shortname)))
 createOutputDirectories(destinationRoot)
@@ -421,10 +419,8 @@ for s in backupTreeRoot.findall("./information/contents/sections")[0].findall(
             if pagefile.mode == "w":
                 pagefile.write("<html>%s<body><blockquote>" % html_header)
                 pagefile.write("<h2>%s (%s)</h2>" % (fullname, shortname))
-                pagefile.write(
-                    "<h1>%s</h1>" % page_title.encode("utf-8", errors="ignore")
-                )
-                pagefile.write(page_content.encode("utf-8", errors="ignore"))
+                pagefile.write("<h1>%s</h1>" % page_title)
+                pagefile.write(page_content)
                 pagefile.close()
 
             page_url = "./section_%03d/%s" % (itemCount, pageFilename)
@@ -489,7 +485,6 @@ for s in backupTreeRoot.findall("./information/contents/sections")[0].findall(
 
     logOutput = section_title + nl
     HTMLOutput += "</ul>"
-    HTMLOutput = HTMLOutput.encode("utf-8", errors="ignore")
 
     urlfile.write(HTMLOutput)
     logfile.write(logOutput)
@@ -525,7 +520,6 @@ for rsrc in root:
     # print "\tHash: '", fhash, "'"
     # print "\tName: '", fname, "'"
     # print "\tComponent: '", fcontext, "'"
-    fname = fname.encode("utf-8", "ignore")
     logfile.write("{0} -- {1} -- {2}\n".format(fname, fhash, fcontext))
     hit = pattern.search(fname)
 
